@@ -11,7 +11,7 @@ yarn add ai3
 We will define simple configurations in `token.js` and create a test in `test.js`.
 
 ```bash
-mkdir ai3 && cd ai3 && yarn init && yarn add ai3
+mkdir myai3 && cd myai3 && yarn init && yarn add ai3
 touch token.js test.js
 ```
 
@@ -136,19 +136,31 @@ describe("AI3", () => {
       players,
       years: 1,
     })
+    assert.equal(nvars.ail, 71) // nvars = new computed variables
+    assert.equal(ai3.get("ail"), 71) // get a single variable
   })
-  assert.equal(nvars.aip, 0.78125) // nvars = new computed variables
-  assert.equal(ai3.get("aip"), 0.78125) // get a single variable
 })
 ```
+
 - `nvars` : new computed variables with the simulation result
 - `res` : simulation result
 - `stats` : daily stats
 
+Add `"type": "module"` to `package.json` so we can test with ES6.
+
+```json
+{
+  "type": "module",
+  "dependencies": {
+    "ai3": "^0.0.2"
+  }
+}
+```
+
 Run the simulation.
 
 ```bash
-node test/test.js
+node test.js
 ```
 
 ### Dashboard
@@ -338,14 +350,14 @@ describe("AI3", () => {
         max = { iusdcl: _vars.iusdcl.val, aip: nvars.aip, res }
       }
     }
-    assert.equal(max.iusdcl, 25)
-	assert.equal(Math.floor(max.aip * 100) / 100, 1.13)
+    assert.equal(max.iusdcl, 18)
+	assert.equal(Math.floor(max.aip * 100) / 100, 1.12)
   })
 })
 
 ```
 
-Now we know `$25` is the best initial USDC liquidity, which increases the $AI price to around `$1.13`.
+Now we know `$18` is the best initial USDC liquidity, which increases the $AI price to around `$1.12`.
 
 ### Plugins
 
