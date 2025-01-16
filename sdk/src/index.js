@@ -27,8 +27,8 @@ export class AI3 {
       s[i + 1] = { i: i + 1 }
       for (let p of players) {
         p.fn({ v, s, i: i + 1, years, r })
-        s[i + 1] = mergeLeft(s[i + 1], r)
       }
+      s[i + 1] = mergeLeft(s[i + 1], r)
     }
     after({ years, v, s, r })
     this.get = get(this.vars, r)

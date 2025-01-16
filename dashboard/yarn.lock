@@ -2320,10 +2320,10 @@ agentkeepalive@^4.5.0:
   dependencies:
     humanize-ms "^1.2.1"
 
-ai3@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/ai3/-/ai3-0.0.2.tgz#f82a015a7b52c4d7f359b91cdbb774af4c743192"
-  integrity sha512-aXzdRtMqqIBS84K3/s6dcMIvpNPSwXcUXOCNnHjSS4opH/hdDtInAw26SKoDdtsQvEl2bbviGKfY5EBcs8Rstw==
+ai3@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/ai3/-/ai3-0.0.3.tgz#c1ab2b3d5c3ebd9c0e311340fa3abc73a5c64b1d"
+  integrity sha512-PIKtXCZ7k+EwLU/z/zzZBg0oJ6YEHCYXFExzv3Sok/6pQAC4Y7eyJqiiT/bnFBVSaBdt9PVilAZOuXVWsstwJQ==
   dependencies:
     "@babel/plugin-transform-modules-commonjs" "^7.24.8"
     ramda "^0.30.1"
