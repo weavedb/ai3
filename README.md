@@ -324,7 +324,7 @@ Now the dashboard is running at [localhost:3000](http://localhost:3000).
 
 You can design the best tokenomics by fuzz testing your simulation logic.
 
-Let's find out the best initial USDC liquidity within the range of $10 and $100 to maximize the $AR token price in a year.
+Let's find out the best initial USDC liquidity within the range of $10 and $100 to maximize the $AI token price in a year.
 
 ```js
 import assert from "assert"
@@ -351,7 +351,7 @@ describe("AI3", () => {
       }
     }
     assert.equal(max.iusdcl, 18)
-	assert.equal(Math.floor(max.aip * 100) / 100, 1.12)
+    assert.equal(Math.floor(max.aip * 100) / 100, 1.12)
   })
 })
 
