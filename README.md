@@ -513,18 +513,21 @@ export const players = [buyer, seller]
 
 ##### Intermediate Variables
 
-- `gain` : capital gain
-- `dur` : vesting period in day
-- `sold` : sold token
-- `price` : target price to sell
-- `cliff` : cliff in day
-- `unlocked` : unlocked yet unsold token
-- `rest` : locked token
-- `rate` : daily unlock rate
 - `p` : percentage to allocate
 - `vp` : vesting period in month
 - `c` : cliff in month
 - `sp` : target price to sell
+- `gain` : capital gain
+- `sold` : sold token
+- `unlocked` : unlocked token
+- `unsold` : unlocked yet unsold token
+- `locked` : locked token
+- `rate` : daily unlock rate
+
+##### Functions
+
+- `unlock ( i )` : unlock vested token
+- `sell ( dex )` : sell unlocked token
 
 #### Building Custom Plugins
 
