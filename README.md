@@ -324,7 +324,7 @@ Now the dashboard is running at [localhost:3000](http://localhost:3000).
 
 ## Advanced
 
-### Finding The Best Parameters
+### Fuzz Testing
 
 You can design the best tokenomics by fuzz testing your simulation logic.
 
@@ -332,7 +332,7 @@ Let's find out the best initial USDC liquidity within the range of $10 and $100 
 
 ```js
 import assert from "assert"
-import { afterEach, describe, it, beforeEach } from "node:test"
+import { describe, it } from "node:test"
 import { AI3 } from "ai3"
 import { vars, before, after, players } from "./token.js"
 import { clone } from "ramda"
@@ -362,6 +362,42 @@ describe("AI3", () => {
 ```
 
 Now we know `$25` is the best initial USDC liquidity, which increases the $AI price to around `$1.13`.
+
+AI3 has an extremely powerful feature to simplify fuzz testing.
+
+```js
+import assert from "assert"
+import { describe, it } from "node:test"
+import { AI3 } from "ai3"
+import {
+  vars,
+  before,
+  after,
+  players,
+} from "../../dashboard/lib/token-ai/index.js"
+
+describe("AI3", () => {
+  it("should find the best iusdcl and iail", async () => {
+    const ai3 = new AI3({ vars })
+    const res = ai3.fuzz({
+      cases: { iusdcl: { range: [10, 101] }, iail: { range: [50, 101] } },
+      find: { aip: "max", diff: "min" },
+      before,
+      after,
+      players,
+      years: 1,
+    })
+    assert.equal(res.aip.case.iusdcl, 10)
+    assert.equal(res.aip.case.iail, 57)
+    assert.equal(res.diff.case.iusdcl, 100)
+    assert.equal(res.diff.case.iail, 50)
+  })
+})
+```
+- `cases` : specify variables with a range to generate test cases with all the possible combinations.
+- `find` : specify variables to check with a function.
+
+The example above will create 4500 test cases with all the possible combinations of `iusdcl (10-100)` and `iail (50-100)`, then find a case that results in the biggest `aip` and a case that results in the smallest `diff`.
 
 ### Plugins
 
