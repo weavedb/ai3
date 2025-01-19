@@ -261,14 +261,14 @@ export const graphs = [
     key: "price",
     name: "$AI Price",
     span: 7,
-    lines: [{ label: "$AI Price", val: "price", floor: false }],
+    lines: [{ label: "$AI Price", key: "price", floor: false }],
   },
   {
     key: "dex",
     name: "DEX Trades",
     lines: [
-      { label: "$AI Sell", val: "total_sell" },
-      { label: "$AI Buy", val: "total_buy", color: "#DC143C" },
+      { label: "$AI Sell", key: "total_sell" },
+      { label: "$AI Buy", key: "total_buy", color: "#DC143C" },
     ],
   },
 ]
@@ -310,7 +310,7 @@ git clone https://github.com/weavedb/ai3.git
 cd ai3/dashboard && yarn
 ```
 
-Replace the `lib/token.js` file, then run the app.
+Replace the `lib/token/index.js` file with the `token.js` created earlier, then run the app.
 
 ```bash
 yarn dev
@@ -350,14 +350,14 @@ describe("AI3", () => {
         max = { iusdcl: _vars.iusdcl.val, aip: nvars.aip, res }
       }
     }
-    assert.equal(max.iusdcl, 18)
-    assert.equal(Math.floor(max.aip * 100) / 100, 1.12)
+    assert.equal(max.iusdcl, 25)
+    assert.equal(Math.floor(max.aip * 100) / 100, 1.13)
   })
 })
 
 ```
 
-Now we know `$18` is the best initial USDC liquidity, which increases the $AI price to around `$1.12`.
+Now we know `$25` is the best initial USDC liquidity, which increases the $AI price to around `$1.13`.
 
 ### Plugins
 

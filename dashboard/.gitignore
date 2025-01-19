@@ -1,4 +1,5 @@
 .env.*
 .vercel
 .next
+lib/token-*/
 node_modules/

@@ -1,8 +1,14 @@
 import assert from "assert"
 import { afterEach, describe, it, beforeEach } from "node:test"
 import { AI3 } from "../src/index.js"
-import { vars, before, after, players } from "./token.js"
+import {
+  vars,
+  before,
+  after,
+  players,
+} from "../../dashboard/lib/token-ai/index.js"
 import { clone } from "ramda"
+
 describe("AI3", () => {
   it("should simulate", async () => {
     const ai3 = new AI3({ vars })
@@ -29,6 +35,7 @@ describe("AI3", () => {
       })
       if (!max || max.aip < nvars.aip) {
         max = { iusdcl: _vars.iusdcl.val, aip: nvars.aip, res }
+        console.log(stats.slice(360))
       }
     }
     assert.equal(max.iusdcl, 25)
