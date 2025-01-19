@@ -8,6 +8,12 @@ yarn add ai3
 
 ## Quick Guide
 
+- [Variables](#variables)
+- [Before / After](#before--after)
+- [Players](#players)
+- [Simulate](#simulatea)
+- [Dashboard](#dashboard)
+
 We will define simple configurations in `token.js` and create a test in `test.js`.
 
 ```bash
@@ -323,6 +329,11 @@ yarn dev
 Now the dashboard is running at [localhost:3000](http://localhost:3000).
 
 ## Advanced
+
+- [Fuzz Testing](#fuzz-testing)
+- [Plugins](#plugins)
+- [Integrating AI Agents](#integrating-ai-agents)
+- [Protocol Owned AI Agents](#protocol-owned-ai-agents)
 
 ### Fuzz Testing
 
