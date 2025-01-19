@@ -16,7 +16,7 @@
   "dependencies": {
     "@chakra-ui/react": "^3.2.4",
     "@emotion/react": "^11.14.0",
-    "ai3": "^0.1.0",
+    "ai3": "^0.1.1",
     "arnext": "^0.1.4",
     "chart.js": "^4.4.7",
     "faker": "^6.6.6",
