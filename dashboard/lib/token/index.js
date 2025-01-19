@@ -23,11 +23,7 @@ export const vars = {
     calc: "DEX()",
   },
   __plugins__: {
-    ai: {
-      type: "token",
-      ticker: "AI",
-      supply: 10000,
-    },
+    ai: { type: "token", ticker: "AI", supply: 10000 },
     dex: {
       type: "dex",
       tokenA: "AI",
@@ -38,9 +34,7 @@ export const vars = {
   },
 }
 
-export const before = ({ v }) => {
-  return { total_buy: 0, total_sell: 0 }
-}
+export const before = ({ v }) => ({ total_buy: 0, total_sell: 0 })
 
 export const after = ({ v, s, r, p }) => {
   r.diff = p.dex.v.pa - v.iaip
