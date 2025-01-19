@@ -1,4 +1,16 @@
-import { clone, isNil, map, is, mapObjIndexed, mergeLeft } from "ramda"
+import {
+  of,
+  compose,
+  flatten,
+  xprod,
+  range,
+  clone,
+  isNil,
+  map,
+  is,
+  mapObjIndexed,
+  mergeLeft,
+} from "ramda"
 import Token from "./plugins/token.js"
 import VC from "./plugins/vc.js"
 import DEX from "./plugins/dex.js"
@@ -23,30 +35,39 @@ const cloneP = (s, p) => {
 export class AI3 {
   constructor({ vars = {}, plugins = {} } = {}) {
     this.vars = vars
+    this.plugins = mergeLeft(plugins, __plugins)
+    const { g, p } = this.init({ vars })
+    this.get = g
+  }
+  init({ vars }) {
     let r = {}
     for (const k in vars.__plugins__ ?? {}) r[k] = {}
-    const g = get(this.vars, r)
-    this.get = g
-    const _plugins = mergeLeft(plugins, __plugins)
-    this.p = {}
+    const g = get(vars, r)
+    let p = {}
     for (const k in vars.__plugins__ ?? {}) {
       const o = vars.__plugins__[k]
-      this.p[k] = new _plugins[o.type]({ o, g, v: this.vars, k })
+      p[k] = new this.plugins[o.type]({ o, g, v: vars, k })
     }
+    return { g, p, r }
   }
-  calc(r = {}) {
-    const _g = get(this.vars, r)
+  calc(r = {}, vars = this.vars) {
+    const _g = get(vars, r)
     let _v = {}
-    for (let k in this.vars) _v[k] = _g(k)
+    for (let k in vars) _v[k] = _g(k)
     return _v
   }
-  simulate({ years = 3, before = f, after = f, players = [] } = {}) {
-    let _r = {}
-    for (const k in this.vars.__plugins__ ?? {}) _r[k] = {}
-    let v = this.calc(_r)
+  simulate({
+    years = 3,
+    before = f,
+    after = f,
+    players = [],
+    vars = this.vars,
+    reinit = false,
+  } = {}) {
     let s = []
-    let p = map(v => v.init(), this.p)
-    const g = get(this.vars, _r)
+    let { p: _p, g, r: _r } = this.init({ vars })
+    let v = this.calc(_r, vars)
+    let p = map(v => v.init(), _p)
     for (const k in p) {
       if (is(Function, p[k].init)) p[k].init({ g })
     }
@@ -78,8 +99,53 @@ export class AI3 {
     }
     after({ years, v, s, r, p })
     for (const k in p) if (p[k].v) r[k] = p[k].v
-    this.get = get(this.vars, r)
-    let nvars = mapObjIndexed((v, k) => this.get(k))(this.vars)
+    this.get = get(vars, r)
+    let nvars = mapObjIndexed((v, k) => this.get(k))(vars)
     return { res: r, stats: s, nvars }
+  }
+  fuzz({ fuzz, find, before, after, players, years = 1 }) {
+    let cases = []
+    let fields = []
+    let results = {}
+    for (const k in find) results[k] = null
+    for (const k in cases) {
+      fields.push(k)
+      const r = cases[k].range
+      const _r = range(r[0], r[1])
+      if (cases.length === 0) cases = map(of(Array))(_r)
+      else cases = compose(map(flatten), xprod(cases))(_r)
+    }
+    let max = null
+    let i = 0
+    for (const c of cases) {
+      let vars = clone(this.vars)
+      let i2 = 0
+      for (const v of c) vars[fields[i2++]].val = v
+      const { nvars, res, stats } = this.simulate({
+        before,
+        after,
+        players,
+        years,
+        vars,
+      })
+      for (const k in results) {
+        let r = results[k]
+        let update = !r
+        if (!update) {
+          if (find[k] === "max") update = r.vals[k] < nvars[k]
+          else if (find[k] === "min") update = r.vals[k] > nvars[k]
+          else if (is(Function(find[k].fn))) {
+            update = find[k]({ current: r[k], val: nvars[k], nvars, res })
+          }
+        }
+        if (update) {
+          results[k] = { case: {}, vals: { [k]: nvars[k] }, res, nvars }
+          let i3 = 0
+          for (const v of fields) results[k].case[v] = c[i3++]
+        }
+      }
+      i++
+    }
+    return results
   }
 }

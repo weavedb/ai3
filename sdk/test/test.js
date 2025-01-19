@@ -20,7 +20,21 @@ describe("AI3", () => {
     })
     assert.equal(nvars.ail, 71)
   })
-
+  it("should find the best iusdcl", async () => {
+    const ai3 = new AI3({ vars })
+    const res = ai3.fuzz({
+      cases: { iusdcl: { range: [10, 101] }, iail: { range: [50, 101] } },
+      find: { aip: "max", diff: "min" },
+      before,
+      after,
+      players,
+      years: 1,
+    })
+    assert.equal(res.aip.case.iusdcl, 10)
+    assert.equal(res.aip.case.iail, 57)
+    assert.equal(res.diff.case.iusdcl, 100)
+    assert.equal(res.diff.case.iail, 50)
+  })
   it("should find the best iusdcl", async () => {
     let max = null
     for (let i = 10; i <= 100; i++) {
@@ -35,7 +49,6 @@ describe("AI3", () => {
       })
       if (!max || max.aip < nvars.aip) {
         max = { iusdcl: _vars.iusdcl.val, aip: nvars.aip, res }
-        console.log(stats.slice(360))
       }
     }
     assert.equal(max.iusdcl, 25)
