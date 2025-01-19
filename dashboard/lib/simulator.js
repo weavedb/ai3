@@ -15,13 +15,23 @@ export const make = (o, _s, set, obj) => {
         ...(!v3.vals
           ? []
           : map(v2 => {
-              const o2 = o[v2]
               if (typeof v2 === "object") return v2
+              const sp = v2.split(":")
+              let i = 0
+              let fixed = false
+              for (let f of sp) {
+                if (i !== 0) {
+                  if (f === "f") fixed = true
+                }
+                i++
+              }
+              const o2 = o[sp[0]]
               const val = typeof o2.val === "function" ? o2.val(g, _s) : o2.val
               return {
-                key: v2.toUpperCase(),
+                fixed,
+                key: sp[0].toUpperCase(),
                 num: val,
-                calc: typeof o2.val === "function" ? (o2.calc ?? "-") : null,
+                calc: o2.calc ?? null,
                 val: Number(val).toString(),
                 set: v => {
                   let _o = clone(o)

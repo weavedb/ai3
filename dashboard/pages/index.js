@@ -11,9 +11,11 @@ import {
   players,
   stats as wstats,
   table,
-} from "../lib/token"
+} from "../lib/token/index.js"
 
+//import { AI3, get } from "../../sdk/src/index.js"
 import { AI3, get } from "ai3"
+
 import { set, make } from "../lib/simulator"
 
 import {
@@ -47,8 +49,18 @@ function bg(lineColor, factor = 0.6) {
 
   return rgbToHex(...lighterRgb)
 }
+let ai3 = new AI3({ vars })
+const val = (path, obj) => {
+  let sp = path.split(".")
+  while (sp.length > 0 && obj) {
+    const s = sp.shift()
+    obj = obj[s]
+  }
+  return obj
+}
+
 export default function Home({ _date = null }) {
-  const [o, setO] = useState(vars)
+  const [o, setO] = useState(ai3.vars)
   const [s, setS] = useState({})
   const [target, setTarget] = useState(graphs[0])
   const [tbl, setTBL] = useState(table[0])
@@ -60,8 +72,8 @@ export default function Home({ _date = null }) {
 
   useEffect(() => {
     clearTimeout(to)
-    const sim = new AI3({ vars: o })
-    const { res: _s, stats: _stats } = sim.simulate({
+    ai3 = new AI3({ vars: o })
+    const { res: _s, stats: _stats } = ai3.simulate({
       before,
       after,
       players,
@@ -89,21 +101,20 @@ export default function Home({ _date = null }) {
   let span = target.span ?? 1
   let w = 1
   let sums = {}
-  for (let v of target.lines) sums[v.val] = { num: 0, sum: 0 }
-
+  for (let v of target.lines) sums[v.key] = { num: 0, sum: 0 }
   let _stats = []
   for (let v of stats) {
     for (let v2 of target.lines) {
-      sums[v2.val].num += 1
-      sums[v2.val].sum += v[v2.val]
+      sums[v2.key].num += 1
+      sums[v2.key].sum += val(v2.key, v)
     }
     if (i === w * span - 1) {
       labels.push(v.i)
       let s = {}
       for (let v of target.lines) {
-        const av = sums[v.val].sum / sums[v.val].num
-        s[v.val] = av
-        sums[v.val] = { num: 0, sum: 0 }
+        const av = sums[v.key].sum / sums[v.key].num
+        s[v.key] = av
+        sums[v.key] = { num: 0, sum: 0 }
       }
       _stats.push(s)
       w++
@@ -112,15 +123,16 @@ export default function Home({ _date = null }) {
   }
   if (sums.num > 0) {
     labels(i)
-    stats.push({ price: sums.av })
+    _stats.push({ price: sums.av })
   }
+
   const data = {
     labels,
     datasets: map(v0 => {
       return {
         label: v0.label,
         data: map(v => {
-          let n = prop(v0.val, v)
+          let n = prop(v0.key, v)
           return v0.floor !== false ? Math.floor(n) : n
         })(_stats),
         borderColor: v0.color ?? "#5137C5",
@@ -130,7 +142,13 @@ export default function Home({ _date = null }) {
       }
     })(target.lines),
   }
-
+  let plugins = []
+  for (const k in vars.__plugins__ ?? {}) {
+    const v = vars.__plugins__[k]
+    let vals = []
+    for (const k2 in v) vals.push({ key: k2, val: v[k2] })
+    plugins.push({ key: k, type: v.type, vals })
+  }
   return (
     <Flex
       color="#222"
@@ -147,8 +165,27 @@ export default function Home({ _date = null }) {
             borderRight: "1px solid #eee",
           }}
         >
-          <Flex p={4} fontSize="16px" align="center" color="#5137C5">
-            <Image src="/logo.svg" h="20px" mr={3} />
+          <Flex px={8} py={2} fontSize="16px" align="center" color="#5137C5">
+            <Flex align="center" mr={4} fontSize="20px" fontWeight="bold">
+              <Image src="/ai3.png" h="34px" mr={3} /> AI3 Tokenomics Simulator
+            </Flex>
+            <Box flex={1} />
+            <Box as="a" target="_blank" href="https://github.com/weavedb/ai3">
+              <Box
+                as="svg"
+                height="32px"
+                viewBox="0 0 24 24"
+                width="32px"
+                css={{ cursor: "pointer", _hover: { opacity: 0.75 } }}
+              >
+                <path
+                  fill="#5137C5"
+                  d="M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142-2.889.532-3.636-.704-3.866-1.35-.13-.331-.69-1.352-1.18-1.625-.402-.216-.977-.748-.014-.762.906-.014 1.553.834 1.769 1.179 1.035 1.74 2.688 1.25 3.349.948.1-.747.402-1.25.733-1.538-2.559-.287-5.232-1.279-5.232-5.678 0-1.25.445-2.285 1.178-3.09-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z"
+                ></path>
+              </Box>
+            </Box>
+          </Flex>
+          <Flex px={8} my={2} fontSize="16px" align="center" color="#5137C5">
             <select
               style={{
                 fontWeight: "bold",
@@ -171,7 +208,7 @@ export default function Home({ _date = null }) {
             >
               {map(v => <option value={v}>{v}</option>)(range(0, 11))}
             </select>
-            <Box ml={3}>Year Projections</Box>
+            <Box ml={3}>Year Projections | {o.__title__}</Box>
           </Flex>
           <Box p={2} align="center">
             <Flex px={4} justify="center">
@@ -267,7 +304,7 @@ export default function Home({ _date = null }) {
           </Flex>
           <Box
             fontSize="9px"
-            h="calc(60vh - 258px)"
+            h="calc(60vh - 292px)"
             css={{ overflowY: "scroll" }}
           >
             {stats.length === 0 ? (
@@ -316,12 +353,12 @@ export default function Home({ _date = null }) {
                         textAlign="right"
                       >
                         {map(v2 => {
-                          let val = "-"
+                          let _val = "-"
                           if (typeof v2.val === "function") {
-                            val = v2.val(v)
+                            _val = v2.val(v)
                           } else {
-                            val = v[v2.val] ?? "-"
-                            if (v2.floor !== false) val = Math.floor(val)
+                            _val = val(v2.val, v) ?? "-"
+                            if (v2.floor !== false) _val = Math.floor(_val)
                           }
                           return (
                             <Box
@@ -329,11 +366,11 @@ export default function Home({ _date = null }) {
                               px={2}
                               color={
                                 is(Function, v2.color)
-                                  ? v2.color(val, v)
+                                  ? v2.color(_val, v)
                                   : (v.color ?? "#222")
                               }
                             >
-                              {val}
+                              {_val}
                             </Box>
                           )
                         })(tbl?.cols ?? [])}
@@ -389,6 +426,41 @@ export default function Home({ _date = null }) {
               </Flex>
             )
           })(players)}
+          <Flex
+            mt={2}
+            fontSize="14px"
+            fontWeight="bold"
+            align="center"
+            h="20px"
+            color="#5137C5"
+            css={{ textDecoration: "underline" }}
+          >
+            Plugins
+          </Flex>
+          {map(v => {
+            let vars = []
+            for (const k in ai3.p[v.key].vars ?? {}) vars.push(k.toUpperCase())
+            return (
+              <Flex h="36px" align="center">
+                <Box w="80px" css={{ borderRight: "1px solid #ccc" }} px={2}>
+                  <Box
+                    fontWeight="bold"
+                    textAlign="right"
+                    fontSize="11px"
+                    color="#5137C5"
+                  >
+                    {v.key.toUpperCase()}
+                  </Box>
+                  <Box color="#666" textAlign="right">
+                    {v.type.toUpperCase()}
+                  </Box>
+                </Box>
+                <Box flex={1} px={2}>
+                  <Box color="#666">{vars.join(", ")}</Box>
+                </Box>
+              </Flex>
+            )
+          })(plugins)}
         </Box>
         {addIndex(map)((v0, i) => {
           return (
@@ -402,8 +474,8 @@ export default function Home({ _date = null }) {
               h="calc(100vh - 15px)"
               pb={4}
             >
-              {map(v =>
-                v.title ? (
+              {map(v => {
+                return v.title ? (
                   <Flex
                     mt={2}
                     fontSize="14px"
@@ -475,7 +547,7 @@ export default function Home({ _date = null }) {
                       )}
                     </Box>
                     <Box flex={1} px={2}>
-                      {v.calc ? (
+                      {v.calc || v.fixed ? (
                         <Box color="#666">
                           {`=`} {v.calc}
                         </Box>
@@ -493,8 +565,8 @@ export default function Home({ _date = null }) {
                       )}
                     </Box>
                   </Flex>
-                ),
-              )(v0)}
+                )
+              })(v0)}
             </Box>
           )
         })(vals)}
